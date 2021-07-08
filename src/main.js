@@ -1,48 +1,4 @@
-import "./style.css";
-
-function render(component, el) {
-  el.innerHTML = component;
-}
-
-function range(start, end, step = 1) {
-  return Array.from({ length: end - start + 1 }, (_, i) => start + i).filter(
-    (i) => i === 0 || Math.floor(i % step) === 0
-  );
-}
-
-function throttle(func) {
-  let skip = false;
-
-  return (...args) => {
-    if (skip) return;
-
-    skip = true;
-
-    requestAnimationFrame(() => {
-      func(...args);
-
-      skip = false;
-    });
-  };
-}
-
-function proxy(value, onChange) {
-  onChange?.(value);
-
-  return {
-    set(newVal) {
-      value = newVal;
-
-      onChange?.(value);
-    },
-    value: () => value,
-  };
-}
-
-const translateX = (el, num = 0) =>
-  (el.style.transform = `translateX(${num}px)`);
-
-const $ = document.querySelector.bind(document);
+import { $, throttle, proxy, range, render, translateX } from "./utils";
 
 const Unit = (id) => /*html */ `
   <div class="flex flex-col items-center w-[48px]">
@@ -96,7 +52,7 @@ function Component() {
       <div class="flex flex-col gap-2 justify-center items-center text-2xl transform text-center">
         <span>&blacktriangledown;</span>
         <span 
-        class="w-8 after:content-['°'] after:absolute"
+        class="after:content-['°'] after:absolute p-2"
         id="display"
         style="background: radial-gradient(black 30%, transparent 80%)">V</span>
         <span class="invisible">-</span>
