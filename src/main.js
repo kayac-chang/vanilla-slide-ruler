@@ -1,16 +1,10 @@
-import { $, throttle, proxy, range, render, translateX } from "./utils";
+import { $, throttle, proxy, range, render, translateX, clamp } from "./utils";
 
 const Unit = (id) => /*html */ `
   <div class="flex flex-col items-center w-[48px]">
     <span class="after:content-['°'] after:absolute">${id}</span>
   </div>
 `;
-
-const clamp = (min, max, num) => Math.min(Math.max(num, min), max);
-
-function between(min, max, num) {
-  return num >= min && num <= max;
-}
 
 function Component({ max, min, step }) {
   queueMicrotask(() => {

@@ -41,3 +41,5 @@ export const translateX = (el, num = 0) =>
   (el.style.transform = `translateX(${num}px)`);
 
 export const $ = document.querySelector.bind(document);
+
+export const clamp = (min, max, num) => Math.min(Math.max(num, min), max);
