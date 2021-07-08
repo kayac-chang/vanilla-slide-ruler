@@ -6,18 +6,29 @@ const Unit = (id) => /*html */ `
   </div>
 `;
 
-function Component() {
-  queueMicrotask(() => {
-    const component = $("#control");
-    const display = $("#display");
+const clamp = (min, max, num) => Math.min(Math.max(num, min), max);
 
+function between(min, max, num) {
+  return num >= min && num <= max;
+}
+
+function Component({ max, min, step }) {
+  queueMicrotask(() => {
     let current = 0;
     let anchor = undefined;
 
-    let value = proxy(
-      current,
-      (value) => (display.textContent = `${Math.round((-value / 48) * 15)}`)
-    );
+    const mapping = (value) => Math.floor((-value / 48) * step);
+    const movement = (value) => {
+      const _value = Math.floor(current + anchor - value);
+
+      return (-clamp(min, max, mapping(_value)) / step) * 48;
+    };
+
+    const value = proxy(current, (value) => {
+      $("#display").textContent = `${mapping(value)}`;
+
+      translateX($("#control"), value);
+    });
 
     const onPointerDown = throttle((event) => {
       anchor = Math.round(event.clientX);
@@ -26,14 +37,11 @@ function Component() {
     const onPointerMove = throttle((event) => {
       if (!anchor) return;
 
-      const movement = Math.round(current + anchor - event.clientX);
-      translateX(component, movement);
-
-      value.set(movement);
+      value.set(movement(event.clientX));
     });
 
     const onPointerUp = throttle((event) => {
-      current = Math.round(current + anchor - event.clientX);
+      current = movement(event.clientX);
       value.set(current);
       anchor = undefined;
     });
@@ -46,7 +54,7 @@ function Component() {
   return /*html */ `
     <div class="w-full select-none relative flex flex-col justify-center items-center text-white overflow-hidden">
       <div class="absolute -mt-8 pb-2 flex border-b-2 border-dotted" id="control">
-        ${range(-180, 180, 15).map(Unit).join("")}
+        ${range(min, max, step).map(Unit).join("")}
       </div>
 
       <div class="flex flex-col gap-2 justify-center items-center text-2xl transform text-center">
@@ -61,4 +69,4 @@ function Component() {
   `;
 }
 
-render(Component(), $("#root"));
+render(Component({ max: 180, min: -180, step: 15 }), $("#root"));
